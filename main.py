@@ -25,7 +25,7 @@ def get_categories():
         for child_category in category_data.get("children_categories", []):
             child_category_id = child_category["id"]
             categories.append({'MLB': child_category_id})
-            print(f"Adicionado: {child_category_id}")
+            print(f"[+] Adicionado: {child_category_id}")
 
         time.sleep(0.75)
         print(f"Categorias: {len(categories)}")
@@ -33,6 +33,7 @@ def get_categories():
     df = pd.DataFrame(categories)
     df.to_excel("result.xlsx", index=False, engine="openpyxl")
     print("Excel gerado.")
+    print("Pressione ENTER para sair")
 
 
 def get_categories_fee():
@@ -69,16 +70,18 @@ def get_categories_fee():
         paths = ">".join([path["name"] for path in response.get("path_from_root", [])])
 
         data.append({'ID Categoria': mlb, 'Caminho': paths, 'Clássico': taxa_classico, 'Premium': taxa_premium})
-        print(f"{mlb}|{paths}|{taxa_classico}|{taxa_premium}")
+        print(f"[+] {mlb}|{paths}|{taxa_classico}|{taxa_premium}")
 
         time_control += 1
 
         if time_control % 10 == 0:
-            print("Safe pause")
+            print("[+] 0.5 Break time")
             time.sleep(0.5)
 
     df = pd.DataFrame(data)
     df.to_excel("categorias.xlsx", index=False, engine="openpyxl")
+    print("Excel gerado.")
+    print("Pressione ENTER para sair")
 
 
 if __name__ == "__main__":
@@ -86,8 +89,8 @@ if __name__ == "__main__":
     option = 0
     while option not in options:
         option = int(input(
-            "[1] Refazer a planilha com todos os IDs (Recomendado mensalmente)\n"
-            "[2] Refazer a planilha com todas as informaçoes (usa a opçao 1 como base) (Recomendado mensalmente)\n"
+            "[1] Refazer a planilha com todos os IDs\n"
+            "[2] Refazer a planilha com todas as informaçoes (usa a opçao 1 como base)\n"
             "[3] Ambos (Recomendado mensalmente)\n"
             "R: "))
 

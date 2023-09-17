@@ -17,7 +17,7 @@ def get_categories():
         print(f"Adicionado: {category_id}")
 
     for category in categories:
-        category_id = category['MLB']
+        category_id = category["ID Categoria"]
         url = f"https://api.mercadolibre.com/categories/{category_id}"
         response = requests.get(url)
         category_data = response.json()

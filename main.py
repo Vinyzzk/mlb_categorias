@@ -55,11 +55,13 @@ def get_categories_fee():
         # Verifica se a lista tem elementos suficientes antes de acessar o índice
         if len(response) > 2:
             taxa_classico = str(response[2].get("sale_fee_amount", "N/A")) + "%"
+            taxa_classico = taxa_classico.replace(".", ",")
         else:
             taxa_classico = "N/A"
 
         if len(response) > 0:
             taxa_premium = str(response[0].get("sale_fee_amount", "N/A")) + "%"
+            taxa_premium = taxa_premium.replace(".", ",")
         else:
             taxa_premium = "N/A"
 
@@ -139,15 +141,77 @@ def get_categories_requirements():
     print("Pressione ENTER para sair")
 
 
+def get_fee_per_mlb():
+    time_control = 0
+
+    data = []
+
+    try:
+        df = pd.read_excel("mlbs.xlsx")
+
+        column = df["MLB"]
+
+        mlbs = column.values
+
+        for mlb in mlbs:
+            url = f"https://api.mercadolibre.com/items/{mlb}"
+            response = requests.get(url)
+            response = response.json()
+            category_id = response["category_id"]
+
+            url = f"https://api.mercadolibre.com/sites/MLB/listing_prices?price=100&category_id={category_id}"
+            response = requests.get(url)
+            response = response.json()
+
+            # Verifica se a lista tem elementos suficientes antes de acessar o índice
+            if len(response) > 2:
+                taxa_classico = str(response[2].get("sale_fee_amount", "N/A")) + "%"
+                taxa_classico = taxa_classico.replace(".", ",")
+            else:
+                taxa_classico = "N/A"
+
+            if len(response) > 0:
+                taxa_premium = str(response[0].get("sale_fee_amount", "N/A")) + "%"
+                taxa_premium = taxa_premium.replace(".", ",")
+            else:
+                taxa_premium = "N/A"
+
+            url = f"https://api.mercadolibre.com/categories/{category_id}"
+            response = requests.get(url)
+            response = response.json()
+
+            paths = ">".join([path["name"] for path in response.get("path_from_root", [])])
+
+            data.append({'MLB': mlb, 'Caminho': paths, 'Clássico': taxa_classico, 'Premium': taxa_premium})
+            print(f"[+] {mlb}|{paths}|{taxa_classico}|{taxa_premium}")
+
+            time_control += 1
+
+            if time_control % 10 == 0:
+                print("[+] 0.5 Break time")
+                time.sleep(0.5)
+
+        df = pd.DataFrame(data)
+        df.to_excel("mlbs+taxas.xlsx", index=False, engine="openpyxl")
+        print("Excel gerado.")
+        print("Pressione ENTER para sair")
+
+    except FileNotFoundError:
+        print("[!] É preciso criar uma planilha chamada \"mlbs.xlsx\"")
+        print("[!] A primeira coluna precisa chamar \"MLB\"")
+        input("[!] Pressione ENTER para finalizar")
+        quit()
+
+
 if __name__ == "__main__":
     options = [1, 2, 3, 4]
     option = 0
     while option not in options:
         option = int(input(
-            "[1] Refazer a planilha com todos os IDs\n"
-            "[2] Refazer a planilha com as taxas (usa a opçao 1 como base)\n"
-            "[3] Ambos (Recomendado mensalmente)\n"
-            "[4] Refaz a planilha com os campos obrigatorios\n"
+            "[1] Refaz a planilha com todos os IDs\n"
+            "[2] Refaz a planilha com as taxas (usa a opçao 1 como base)\n"
+            "[3] Refaz a planilha com os campos obrigatorios\n"
+            "[4] Gera uma planilha com taxas por anúncio (MLB)\n"
             "R: "))
 
     if option == 1:
@@ -155,7 +219,6 @@ if __name__ == "__main__":
     if option == 2:
         get_categories_fee()
     if option == 3:
-        get_categories()
-        get_categories_fee()
-    if option == 4:
         get_categories_requirements()
+    if option == 4:
+        get_fee_per_mlb()

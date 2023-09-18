@@ -203,8 +203,81 @@ def get_fee_per_mlb():
         quit()
 
 
+def get_requirements_per_mlb():
+    data = []
+
+    try:
+        df = pd.read_excel("mlbs.xlsx")
+        column = df["MLB"]
+        mlbs = column.values
+
+        for mlb in mlbs:
+            url = f"https://api.mercadolibre.com/items/{mlb}"
+            response = requests.get(url)
+            response = response.json()
+            category_id = response["category_id"]
+
+            url = f"https://api.mercadolibre.com/categories/{category_id}"
+            response = requests.get(url)
+            response = response.json()
+            paths = ">".join([path["name"] for path in response.get("path_from_root", [])])
+
+            variations = 0
+            custom_fields = 0
+
+            url = f"https://api.mercadolibre.com/categories/{category_id}/attributes"
+            response = requests.get(url)
+            category_raw = response.json()
+
+            variations_list = []
+            custom_fields_list = []
+            gtin_list = []
+
+            for i in category_raw:
+                try:
+                    if i["tags"]["allow_variations"]:
+                        variations_list.append(i["name"])
+                        variations += 1
+                except KeyError:
+                    continue
+
+            for i in category_raw:
+                try:
+                    if i["tags"]["required"]:
+                        custom_fields_list.append(i["name"])
+                        custom_fields += 1
+                except KeyError:
+                    continue
+
+            for i in category_raw:
+                try:
+                    if i["tags"]["conditional_required"]:
+                        gtin_list.append("Sim")
+                except KeyError:
+                    continue
+
+            data.append({'MLB': mlb,
+                         'Categoria': paths,
+                         'Var1': variations_list[0] if len(variations_list) > 0 else "N/A",
+                         'Var2': variations_list[1] if len(variations_list) > 1 else "N/A",
+                         'CF1': custom_fields_list[0] if len(custom_fields_list) > 0 else "N/A",
+                         'CF2': custom_fields_list[1] if len(custom_fields_list) > 1 else "N/A",
+                         'GTIN': gtin_list[0] if len(gtin_list) > 0 else "N/A"})
+
+        df = pd.DataFrame(data)
+        df.to_excel("mlbs+campos obrigatorios.xlsx", index=False, engine="openpyxl")
+        print("Excel gerado.")
+        print("Pressione ENTER para sair")
+
+    except FileNotFoundError:
+        print("[!] É preciso criar uma planilha chamada \"mlbs.xlsx\"")
+        print("[!] A primeira coluna precisa chamar \"MLB\"")
+        input("[!] Pressione ENTER para finalizar")
+        quit()
+
+
 if __name__ == "__main__":
-    options = [1, 2, 3, 4]
+    options = [1, 2, 3, 4, 5]
     option = 0
     while option not in options:
         option = int(input(
@@ -212,6 +285,7 @@ if __name__ == "__main__":
             "[2] Refaz a planilha com as taxas (usa a opçao 1 como base)\n"
             "[3] Refaz a planilha com os campos obrigatorios\n"
             "[4] Gera uma planilha com taxas por anúncio (MLB)\n"
+            "[5] Gera uma planilha com campos obrigatorios por anúncio\n"
             "R: "))
 
     if option == 1:
@@ -222,3 +296,5 @@ if __name__ == "__main__":
         get_categories_requirements()
     if option == 4:
         get_fee_per_mlb()
+    if option == 5:
+        get_requirements_per_mlb()

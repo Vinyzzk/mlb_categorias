@@ -31,9 +31,10 @@ def get_categories():
         print(f"Categorias: {len(categories)}")
 
     df = pd.DataFrame(categories)
-    df.to_excel("result.xlsx", index=False, engine="openpyxl")
-    print("Excel gerado.")
-    print("Pressione ENTER para sair")
+    excel_name = "Categorias"
+    df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
+    print(f"[+] Planilha \"{excel_name}\" gerada.")
+    print("[+] Pressione ENTER para sair")
 
 
 def get_categories_fee():
@@ -41,7 +42,7 @@ def get_categories_fee():
 
     data = []
 
-    df = pd.read_excel("result.xlsx")
+    df = pd.read_excel("Categorias.xlsx")
 
     column = df["ID Categoria"]
 
@@ -81,9 +82,10 @@ def get_categories_fee():
             time.sleep(0.5)
 
     df = pd.DataFrame(data)
-    df.to_excel("categorias.xlsx", index=False, engine="openpyxl")
-    print("Excel gerado.")
-    print("Pressione ENTER para sair")
+    excel_name = "Categorias + Taxas"
+    df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
+    print(f"[+] Planilha \"{excel_name}\" gerada.")
+    print("[+] Pressione ENTER para sair")
 
 
 def get_categories_requirements():
@@ -136,9 +138,10 @@ def get_categories_requirements():
                      'GTIN': gtin_list[0] if len(gtin_list) > 0 else "N/A"})
 
     df = pd.DataFrame(data)
-    df.to_excel("categorias_campos.xlsx", index=False, engine="openpyxl")
-    print("Excel gerado.")
-    print("Pressione ENTER para sair")
+    excel_name = "Categorias + Campos obrigatórios"
+    df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
+    print(f"[+] Planilha \"{excel_name}\" gerada.")
+    print("[+] Pressione ENTER para sair")
 
 
 def get_fee_per_mlb():
@@ -192,9 +195,10 @@ def get_fee_per_mlb():
                 time.sleep(0.5)
 
         df = pd.DataFrame(data)
-        df.to_excel("mlbs+taxas.xlsx", index=False, engine="openpyxl")
-        print("Excel gerado.")
-        print("Pressione ENTER para sair")
+        excel_name = "MLBs + Taxas"
+        df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
+        print(f"[+] Planilha \"{excel_name}\" gerada.")
+        print("[+] Pressione ENTER para sair")
 
     except FileNotFoundError:
         print("[!] É preciso criar uma planilha chamada \"mlbs.xlsx\"")
@@ -265,9 +269,10 @@ def get_requirements_per_mlb():
                          'GTIN': gtin_list[0] if len(gtin_list) > 0 else "N/A"})
 
         df = pd.DataFrame(data)
-        df.to_excel("mlbs+campos obrigatorios.xlsx", index=False, engine="openpyxl")
-        print("Excel gerado.")
-        print("Pressione ENTER para sair")
+        excel_name = "MLBs + Campos obrigatórios"
+        df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
+        print(f"[+] Planilha \"{excel_name}\" gerada.")
+        print("[+] Pressione ENTER para sair")
 
     except FileNotFoundError:
         print("[!] É preciso criar uma planilha chamada \"mlbs.xlsx\"")

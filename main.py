@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import openpyxl
 import time
+import os
 
 
 def get_categories():
@@ -14,7 +15,7 @@ def get_categories():
     for category in response:
         category_id = category["id"]
         categories.append({'ID Categoria': category_id})
-        print(f"Adicionado: {category_id}")
+        print(f"[+] Adicionado: {category_id}")
 
     for category in categories:
         category_id = category["ID Categoria"]
@@ -28,12 +29,11 @@ def get_categories():
             print(f"[+] Adicionado: {child_category_id}")
 
         time.sleep(0.75)
-        print(f"Categorias: {len(categories)}")
 
     df = pd.DataFrame(categories)
     excel_name = "Categorias"
     df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
-    print(f"[+] Planilha \"{excel_name}\" gerada.")
+    print(f"[+] Planilha \"{excel_name}\" gerada")
     print("[+] Pressione ENTER para sair")
 
 
@@ -43,10 +43,11 @@ def get_categories_fee():
     data = []
 
     df = pd.read_excel("Categorias.xlsx")
-
     column = df["ID Categoria"]
-
     categories = column.values
+
+    categories_qty = len(categories)
+    categories_logs = 0
 
     for mlb in categories:
         url = f"https://api.mercadolibre.com/sites/MLB/listing_prices?price=100&category_id={mlb}"
@@ -73,7 +74,6 @@ def get_categories_fee():
         paths = ">".join([path["name"] for path in response.get("path_from_root", [])])
 
         data.append({'ID Categoria': mlb, 'Caminho': paths, 'Clássico': taxa_classico, 'Premium': taxa_premium})
-        print(f"[+] {mlb}|{paths}|{taxa_classico}|{taxa_premium}")
 
         time_control += 1
 
@@ -81,10 +81,14 @@ def get_categories_fee():
             print("[+] 0.5 Break time")
             time.sleep(0.5)
 
+        categories_qty -= 1
+        categories_logs += 1
+        print(f"[+] Gerados: {categories_logs} | Faltam: {categories_qty}")
+
     df = pd.DataFrame(data)
     excel_name = "Categorias + Taxas"
     df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
-    print(f"[+] Planilha \"{excel_name}\" gerada.")
+    print(f"[+] Planilha \"{excel_name}\" gerada")
     print("[+] Pressione ENTER para sair")
 
 
@@ -94,6 +98,9 @@ def get_categories_requirements():
     df = pd.read_excel("result.xlsx")
     column = df["ID Categoria"]
     categories = column.values
+
+    categories_qty = len(categories)
+    categories_logs = 0
 
     for category in categories:
 
@@ -137,10 +144,14 @@ def get_categories_requirements():
                      'CF2': custom_fields_list[1] if len(custom_fields_list) > 1 else "N/A",
                      'GTIN': gtin_list[0] if len(gtin_list) > 0 else "N/A"})
 
+        categories_qty -= 1
+        categories_logs += 1
+        print(f"[+] Gerados: {categories_logs} | Faltam: {categories_qty}")
+
     df = pd.DataFrame(data)
     excel_name = "Categorias + Campos obrigatórios"
     df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
-    print(f"[+] Planilha \"{excel_name}\" gerada.")
+    print(f"[+] Planilha \"{excel_name}\" gerada")
     print("[+] Pressione ENTER para sair")
 
 
@@ -153,8 +164,10 @@ def get_fee_per_mlb():
         df = pd.read_excel("mlbs.xlsx")
 
         column = df["MLB"]
-
         mlbs = column.values
+
+        mlbs_qty = len(mlbs)
+        mlbs_logs = 0
 
         for mlb in mlbs:
             url = f"https://api.mercadolibre.com/items/{mlb}"
@@ -194,10 +207,14 @@ def get_fee_per_mlb():
                 print("[+] 0.5 Break time")
                 time.sleep(0.5)
 
+            mlbs_qty -= 1
+            mlbs_logs += 1
+            print(f"[+] Gerados: {mlbs_logs} | Faltam: {mlbs_qty}")
+
         df = pd.DataFrame(data)
         excel_name = "MLBs + Taxas"
         df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
-        print(f"[+] Planilha \"{excel_name}\" gerada.")
+        print(f"[+] Planilha \"{excel_name}\" gerada")
         print("[+] Pressione ENTER para sair")
 
     except FileNotFoundError:
@@ -214,6 +231,9 @@ def get_requirements_per_mlb():
         df = pd.read_excel("mlbs.xlsx")
         column = df["MLB"]
         mlbs = column.values
+
+        mlbs_qty = len(mlbs)
+        mlbs_logs = 0
 
         for mlb in mlbs:
             url = f"https://api.mercadolibre.com/items/{mlb}"
@@ -268,10 +288,14 @@ def get_requirements_per_mlb():
                          'CF2': custom_fields_list[1] if len(custom_fields_list) > 1 else "N/A",
                          'GTIN': gtin_list[0] if len(gtin_list) > 0 else "N/A"})
 
+            mlbs_qty -= 1
+            mlbs_logs += 1
+            print(f"[+] Gerados: {mlbs_logs} | Faltam: {mlbs_qty}")
+
         df = pd.DataFrame(data)
         excel_name = "MLBs + Campos obrigatórios"
         df.to_excel(f"{excel_name}.xlsx", index=False, engine="openpyxl")
-        print(f"[+] Planilha \"{excel_name}\" gerada.")
+        print(f"[+] Planilha \"{excel_name}\" gerada")
         print("[+] Pressione ENTER para sair")
 
     except FileNotFoundError:
@@ -285,6 +309,7 @@ if __name__ == "__main__":
     options = [1, 2, 3, 4, 5]
     option = 0
     while option not in options:
+        print("-----------------------------------------------")
         option = int(input(
             "[1] Refaz a planilha com todos os IDs\n"
             "[2] Refaz a planilha com as taxas (usa a opçao 1 como base)\n"
@@ -294,12 +319,17 @@ if __name__ == "__main__":
             "R: "))
 
     if option == 1:
+        os.system('cls')
         get_categories()
     if option == 2:
+        os.system('cls')
         get_categories_fee()
     if option == 3:
+        os.system('cls')
         get_categories_requirements()
     if option == 4:
+        os.system('cls')
         get_fee_per_mlb()
     if option == 5:
+        os.system('cls')
         get_requirements_per_mlb()

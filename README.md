@@ -3,6 +3,7 @@ Gera planilhas atualizadas das informaçoes de categorias do MercadoLivre
 
 
 **Como usar**:
+(Abra a pasta baixada com o arquivo main.py)
 - Python 3.9.12 > *pip install -r requirements.txt*
 - cmd.exe > *py main.py*
 

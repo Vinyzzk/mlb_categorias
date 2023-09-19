@@ -2,8 +2,8 @@
 Gera planilhas atualizadas das informaçoes de categorias do MercadoLivre
 
 **Como usar**:
-Python 3.9.12 > *pip install -r requirements.txt*
-cmd.exe > *py main.py*
+- Python 3.9.12 > *pip install -r requirements.txt*
+- cmd.exe > *py main.py*
 
 **Recursos:**
 - Interface "terminal-based" de simples entendimento

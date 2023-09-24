@@ -101,6 +101,7 @@ def get_categories_requirements():
 
     categories_qty = len(categories)
     categories_logs = 0
+    time_control = 0
 
     for category in categories:
 
@@ -109,44 +110,51 @@ def get_categories_requirements():
 
         url = f"https://api.mercadolibre.com/categories/{category}/attributes"
         response = requests.get(url)
-        category_raw = response.json()
+        if response.status_code == 200:
+            category_raw = response.json()
 
-        variations_list = []
-        custom_fields_list = []
-        gtin_list = []
+            variations_list = []
+            custom_fields_list = []
+            gtin_list = []
 
-        for i in category_raw:
-            try:
-                if i["tags"]["allow_variations"]:
-                    variations_list.append(i["name"])
-                    variations += 1
-            except KeyError:
-                continue
+            for i in category_raw:
+                try:
+                    if i["tags"]["allow_variations"]:
+                        variations_list.append(i["name"])
+                        variations += 1
+                except KeyError:
+                    continue
 
-        for i in category_raw:
-            try:
-                if i["tags"]["required"]:
-                    custom_fields_list.append(i["name"])
-                    custom_fields += 1
-            except KeyError:
-                continue
+            for i in category_raw:
+                try:
+                    if i["tags"]["required"]:
+                        custom_fields_list.append(i["name"])
+                        custom_fields += 1
+                except KeyError:
+                    continue
 
-        for i in category_raw:
-            try:
-                if i["tags"]["conditional_required"]:
-                    gtin_list.append("Sim")
-            except KeyError:
-                continue
+            for i in category_raw:
+                try:
+                    if i["tags"]["conditional_required"]:
+                        gtin_list.append("Sim")
+                except KeyError:
+                    continue
 
-        data.append({'ID Categoria': category, 'Var1': variations_list[0] if len(variations_list) > 0 else "N/A",
-                     'Var2': variations_list[1] if len(variations_list) > 1 else "N/A",
-                     'CF1': custom_fields_list[0] if len(custom_fields_list) > 0 else "N/A",
-                     'CF2': custom_fields_list[1] if len(custom_fields_list) > 1 else "N/A",
-                     'GTIN': gtin_list[0] if len(gtin_list) > 0 else "N/A"})
+            data.append({'ID Categoria': category, 'Var1': variations_list[0] if len(variations_list) > 0 else "N/A",
+                         'Var2': variations_list[1] if len(variations_list) > 1 else "N/A",
+                         'CF1': custom_fields_list[0] if len(custom_fields_list) > 0 else "N/A",
+                         'CF2': custom_fields_list[1] if len(custom_fields_list) > 1 else "N/A",
+                         'GTIN': gtin_list[0] if len(gtin_list) > 0 else "N/A"})
 
-        categories_qty -= 1
-        categories_logs += 1
-        print(f"[+] Gerados: {categories_logs} | Faltam: {categories_qty}")
+            time_control += 1
+
+            if time_control % 10 == 0:
+                print("[+] 0.5 Break time")
+                time.sleep(0.5)
+
+            categories_qty -= 1
+            categories_logs += 1
+            print(f"[+] Gerados: {categories_logs} | Faltam: {categories_qty}")
 
     df = pd.DataFrame(data)
     excel_name = "Categorias + Campos obrigatórios"
